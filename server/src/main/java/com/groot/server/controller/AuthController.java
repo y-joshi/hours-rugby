@@ -23,7 +23,6 @@ import javax.validation.Valid;
 @RequestMapping("/api")
 public class AuthController {
 
-
     @Autowired
     private AuthenticationManager authenticationManager;
 
@@ -64,26 +63,37 @@ public class AuthController {
 
     @PostMapping("/signup")
     public ResponseEntity<?> registerUser(@Valid @RequestBody SignupRequest signUpRequest) {
-        if (userRepository.existsByUsername(signUpRequest.getUsername())) {
-            return ResponseEntity
-                    .badRequest()
-                    .body(new MessageResponse("Error: Username is already taken!"));
-        }
-
-        if (userRepository.existsByEmail(signUpRequest.getEmail())) {
-            return ResponseEntity
-                    .badRequest()
-                    .body(new MessageResponse("Error: Email is already in use!"));
-        }
-
         // Create new user's account
         User user = new User(signUpRequest.getUsername(),
                 signUpRequest.getEmail(),
+                signUpRequest.getName(),
                 passwordEncoder.encode(signUpRequest.getPassword()));
 
         userRepository.save(user);
 
         return ResponseEntity.ok(new MessageResponse("User registered successfully!"));
+    }
+
+    @GetMapping("/check/username/{username}")
+    public ResponseEntity<?> checkByUsername(@PathVariable String username) {
+        System.out.println(username+" checked!");
+        if (userRepository.existsByUsername(username)) {
+            return ResponseEntity
+                    .badRequest()
+                    .body(new MessageResponse("Error: Username is already taken!"));
+        }
+        return ResponseEntity.ok(new MessageResponse("Username is available!"));
+    }
+
+    @GetMapping("/check/email/{email}")
+    public ResponseEntity<?> checkByEmail(@PathVariable String email) {
+        if (userRepository.existsByEmail(email)) {
+            return ResponseEntity
+                    .badRequest()
+                    .body(new MessageResponse("Error: Email is already in use!"));
+        }
+
+        return ResponseEntity.ok(new MessageResponse("Username is available!"));
     }
 
 
