@@ -15,7 +15,7 @@ import java.util.function.Function;
 public class JwtUtils {
 
     private final String SECRET_KEY = "very-secret";
-    private final int EXP_TIME = 3600000;
+    private final int EXP_TIME = 1000*60*60*24*5;// 5 days
 
     public String extractUsername(String token) {
         return extractClaim(token, Claims::getSubject);
