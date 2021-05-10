@@ -23,7 +23,7 @@ function Login(props) {
 	}
 	const signin = () => {
 		const request = JSON.stringify({
-			"username": username,
+			"username": username.trim(),
 			"password": password
 		})
 		axios.post(process.env.REACT_APP_API_URL + "signin", request, {
@@ -32,7 +32,7 @@ function Login(props) {
 			}
 		})
 			.then(res => {
-				localStorage.setItem("Jwt", res.data.jwt)
+				localStorage.setItem("jwt", res.data.jwt)
 				history.push('app')
 			})
 			.catch(error => {
@@ -62,7 +62,7 @@ function Login(props) {
 						<div className="w-full">
 							<h1 className="mb-4 text-xl font-semibold text-gray-700 dark:text-gray-200">Login</h1>
 							<Label>
-								<Input className="mt-1" type="username" placeholder="Username" value={username} onChange={e => { setUsername(e.target.value); setError(false) }} onKeyDown={_handleKeyDown}/>
+								<Input className="mt-1" type="username" placeholder="Username" value={username} onChange={e => { setUsername(e.target.value); setError(false) }} onKeyDown={_handleKeyDown} />
 							</Label>
 							{error && !username ? <HelperText valid={false} > Please enter valid Username</HelperText> : ''}
 

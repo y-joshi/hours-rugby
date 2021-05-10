@@ -10,18 +10,12 @@ require('dotenv').config()
 
 function Login() {
   const BLANK_FIELD = "Please fill this field!"
-  const NOT_AVAIL = " is not available!"
   const NOT_VALID = "Please enter valid "
-  const PASS_LEN = "Your password must be at least 6 characters long."
+  const PASS_LEN = 6
+  const PASS_LEN_ERROR = "Your password must be at least 6 characters long."
   const PASS_NOT_MATCH = "Password not matched!"
 
-  const [errors, setErrors] = useState({
-    "name": '',
-    "email": '',
-    "username": '',
-    "password": '',
-    "cpassword": ''
-  })
+  const [errors, setErrors] = useState({})
   const [fields, setFields] = useState({
     name: '',
     email: '',
@@ -32,25 +26,20 @@ function Login() {
   const history = useHistory();
 
   const [isModalOpen, setIsModalOpen] = useState(false)
+  const [validMail, setValidMail] = useState(true)
+  const [validUsername, setValidUsername] = useState(true)
 
   const handleVaildation = () => {
     let valid = true
-    let errors = {
-      "name": '',
-      "email": '',
-      "username": '',
-      "password": '',
-      "cpassword": ''
-    }
+    let errors = {}
 
     //name
     if (!fields.name) {
       valid = false
       errors["name"] = BLANK_FIELD;
-      // setErrors({ ...errors, "name": BLANK_FIELD })
     }
     if (fields.name) {
-      if (!fields.name.match(/^[a-zA-Z]+$/)) {
+      if (!fields.name.match(/^([a-zA-Z]+\s)*[a-zA-Z]+$/)) {
         valid = false
         errors["name"] = NOT_VALID + "name! Only letters allowed"
       }
@@ -60,7 +49,6 @@ function Login() {
     if (!fields.email) {
       valid = false
       errors["email"] = BLANK_FIELD;
-      //setErrors({ ...errors, "email": BLANK_FIELD })
     }
 
     if (fields.email) {
@@ -80,8 +68,6 @@ function Login() {
     if (!fields.username) {
       valid = false
       errors["username"] = BLANK_FIELD;
-      // setErrors({ ...errors, "username": BLANK_FIELD })
-
     }
 
 
@@ -89,66 +75,55 @@ function Login() {
     if (!fields.password) {
       valid = false
       errors["password"] = BLANK_FIELD;
-      //setErrors({ ...errors, password: BLANK_FIELD })
-
     }
-    if (fields.password && (fields.password.length < 6)) {
+    if (fields.password && (fields.password.length < PASS_LEN)) {
       valid = false
-      errors["password"] = NOT_VALID + "password!" + PASS_LEN;
+      errors["password"] = NOT_VALID + "password!" + PASS_LEN_ERROR;
     }
 
     //confirm password
     if (!fields.cpassword) {
       valid = false
       errors["cpassword"] = BLANK_FIELD;
-      // setErrors({ ...errors, cpassword: BLANK_FIELD })
-
     }
-    if (fields.password && fields.cpassword && (fields.password.length >= 6) && (fields.password !== fields.cpassword)) {
-      console.log("Pass not match!");
+    if (fields.password && fields.cpassword && (fields.password.length >= PASS_LEN) && (fields.password !== fields.cpassword)) {
       valid = false
-       errors["cpassword"] = PASS_NOT_MATCH;
+      errors["cpassword"] = PASS_NOT_MATCH;
     }
     setErrors(errors)
-
-    //check username
-    if (fields.username && !errors["username"]) {
-      axios.get(process.env.REACT_APP_API_URL + `check/username/${fields.username}`)
-        .catch(err => {
-          console.log(err.response.status);
-          valid = false
-          // errors["username"] = "This username" + NOT_AVAIL
-          setErrors({ ...errors, "username": "This username" + NOT_AVAIL })
-        })
-    }
-    //check email
-    if (fields.email && !errors["email"]) {
-      axios.get(process.env.REACT_APP_API_URL + `check/email/${fields.email}`)
-        .catch(err => {
-          console.log(err.response.status);
-          valid = false
-          // errors["email"] = "This email" + NOT_AVAIL
-          setErrors({ ...errors, "email": "This email" + NOT_AVAIL })
-
-        })
-    }
-    console.log(errors);
     return valid
   }
-  const signup = () => {
+
+  const handleSignup = () => {
+
     if (handleVaildation()) {
-      console.log("HERER TO CALL API");
       const request = JSON.stringify({
-        "username": fields.username,
+        "username": fields.username.trim(),
         "password": fields.password,
         "email": fields.email,
         "name": fields.name
       })
-      setIsModalOpen(true)
+
+      axios.post(process.env.REACT_APP_API_URL + "signup", request, {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+        .then(res => {
+          setValidMail(true)
+          setValidUsername(true)
+          setIsModalOpen(true)
+        })
+        .catch(error => {
+          if (error.response.data.username) setValidUsername(false)
+          else setValidUsername(true)
+          if (error.response.data.email) setValidMail(false)
+          else setValidMail(true)
+
+        })
     }
 
   }
-
   return (
     <div className="flex items-center min-h-screen p-6 bg-gray-50 dark:bg-gray-900">
       <div className="flex-1 h-full max-w-4xl mx-auto overflow-hidden bg-white rounded-lg shadow-xl dark:bg-gray-800">
@@ -181,47 +156,38 @@ function Login() {
                 <Input className="mt-4" type="email" placeholder="Email" value={fields.email} onChange={e => { setFields({ ...fields, email: e.target.value }) }} />
               </Label>
               {errors.email ? <HelperText valid={false} > {errors.email}</HelperText> : ''}
-
+              {!validMail ? <HelperText valid={false} > Email is already in use!</HelperText> : ''}
 
               <Label>
                 <Input className="mt-4" placeholder="Username" value={fields.username} onChange={e => { setFields({ ...fields, username: e.target.value }) }} />
               </Label>
               {errors.username ? <HelperText valid={false} > {errors.username}</HelperText> : ''}
+              {!validUsername ? <HelperText valid={false} > Username is already taken!</HelperText> : ''}
 
               <Label className="mt-4">
                 <Input className="mt-1" placeholder="Password" type="password" value={fields.password} onChange={e => { setFields({ ...fields, password: e.target.value }) }} />
               </Label>
               {errors.password ? <HelperText valid={false} > {errors.password}</HelperText> : ''}
 
-
               <Label className="mt-4">
                 <Input className="mt-1" placeholder="Confirm Password" type="password" value={fields.cpassword} onChange={e => { setFields({ ...fields, cpassword: e.target.value }) }} />
               </Label>
               {errors.cpassword ? <HelperText valid={false} > {errors.cpassword}</HelperText> : ''}
 
-              <Button block className="mt-8" onClick={signup}>
+              <Button block className="mt-8" onClick={handleSignup}>
                 Create account
               </Button>
 
-              <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
-                <ModalHeader>Modal header</ModalHeader>
+              <Modal isOpen={isModalOpen} onClose={() => { setIsModalOpen(false); history.push('login') }}>
+                <ModalHeader>Hi {fields.name}</ModalHeader>
                 <ModalBody>
-                  Lorem, ipsum dolor sit amet consectetur adipisicing elit. Nostrum et eligendi repudiandae
-                  voluptatem tempore!
+                  Your account created successfully!
                 </ModalBody>
                 <ModalFooter>
 
                   <div className="hidden sm:block">
-                    <Button layout="outline" onClick={() => setIsModalOpen(false)}>
-                      Cancel
-                    </Button>
-                  </div>
-                  <div className="hidden sm:block">
-                    <Button>Accept</Button>
-                  </div>
-                  <div className="block w-full sm:hidden">
-                    <Button block size="large" layout="outline" onClick={() => setIsModalOpen(false)}>
-                      Cancel
+                    <Button layout="outline" onClick={() => { setIsModalOpen(false); history.push('login') }}>
+                      OK
                     </Button>
                   </div>
                   <div className="block w-full sm:hidden">

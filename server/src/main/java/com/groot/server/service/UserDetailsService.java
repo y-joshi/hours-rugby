@@ -16,7 +16,7 @@ public class UserDetailsService implements org.springframework.security.core.use
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        userRepository.findAll().forEach(user -> System.out.println(user.getUsername()));
+        System.out.println(username + " called API");
         com.groot.server.model.User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found : " + username));
 
