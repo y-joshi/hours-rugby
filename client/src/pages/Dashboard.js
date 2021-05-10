@@ -9,6 +9,9 @@ import PageTitle from '../components/Typography/PageTitle'
 import { ChatIcon, CartIcon, MoneyIcon, PeopleIcon } from '../icons'
 import RoundIcon from '../components/RoundIcon'
 import response from '../utils/demo/tableData'
+import { HeartIcon, EditIcon, } from '../icons'
+import { PlayArrowRounded } from '@material-ui/icons'
+
 import {
   TableBody,
   TableContainer,
@@ -20,6 +23,7 @@ import {
   Avatar,
   Badge,
   Pagination,
+  Button
 } from '@windmill/react-ui'
 
 import {
@@ -49,10 +53,10 @@ function Dashboard() {
   }, [page])
 
   return (
-    <>
-      <PageTitle>Dashboard</PageTitle>
-
-      <CTA />
+    <React.Fragment>
+      <div className="mt-6 ml-2 mb-6 btn-success">
+        <Button iconRight={PlayArrowRounded} size="large"> Start </Button>
+      </div>
 
       {/* <!-- Cards --> */}
       <div className="grid gap-6 mb-8 md:grid-cols-2 xl:grid-cols-4">
@@ -72,7 +76,7 @@ function Dashboard() {
             bgColorClass="bg-green-100 dark:bg-green-500"
             className="mr-4"
           />
-        </InfoCard>
+        </InfoCard> 
 
         <InfoCard title="New sales" value="376">
           <RoundIcon
@@ -93,51 +97,6 @@ function Dashboard() {
         </InfoCard>
       </div>
 
-      <TableContainer>
-        <Table>
-          <TableHeader>
-            <tr>
-              <TableCell>Client</TableCell>
-              <TableCell>Amount</TableCell>
-              <TableCell>Status</TableCell>
-              <TableCell>Date</TableCell>
-            </tr>
-          </TableHeader>
-          <TableBody>
-            {data.map((user, i) => (
-              <TableRow key={i}>
-                <TableCell>
-                  <div className="flex items-center text-sm">
-                    <Avatar className="hidden mr-3 md:block" src={user.avatar} alt="User image" />
-                    <div>
-                      <p className="font-semibold">{user.name}</p>
-                      <p className="text-xs text-gray-600 dark:text-gray-400">{user.job}</p>
-                    </div>
-                  </div>
-                </TableCell>
-                <TableCell>
-                  <span className="text-sm">$ {user.amount}</span>
-                </TableCell>
-                <TableCell>
-                  <Badge type={user.status}>{user.status}</Badge>
-                </TableCell>
-                <TableCell>
-                  <span className="text-sm">{new Date(user.date).toLocaleDateString()}</span>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-        <TableFooter>
-          <Pagination
-            totalResults={totalResults}
-            resultsPerPage={resultsPerPage}
-            label="Table navigation"
-            onChange={onPageChange}
-          />
-        </TableFooter>
-      </TableContainer>
-
       <PageTitle>Charts</PageTitle>
       <div className="grid gap-6 mb-8 md:grid-cols-2">
         <ChartCard title="Revenue">
@@ -150,7 +109,7 @@ function Dashboard() {
           <ChartLegend legends={lineLegends} />
         </ChartCard>
       </div>
-    </>
+    </React.Fragment>
   )
 }
 

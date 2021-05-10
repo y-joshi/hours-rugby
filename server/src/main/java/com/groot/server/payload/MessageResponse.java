@@ -1,17 +1,27 @@
 package com.groot.server.payload;
 
+import java.util.ArrayList;
+import java.util.Map;
+
 public class MessageResponse {
-    private String message;
+    private Map<String, String> messages;
 
-    public MessageResponse(String message) {
-        this.message = message;
+    public MessageResponse() {
     }
 
-    public String getMessage() {
-        return message;
+    public MessageResponse(Map<String, String> messages) {
+        this.messages = messages;
     }
 
-    public void setMessage(String message) {
-        this.message = message;
+    public Map<String, String> getMessages() {
+        return messages;
+    }
+
+    public void setMessages(Map<String, String> messages) {
+        this.messages = messages;
+    }
+
+    public void addMessage(String key, String value) {
+        this.messages.put(key, value);
     }
 }

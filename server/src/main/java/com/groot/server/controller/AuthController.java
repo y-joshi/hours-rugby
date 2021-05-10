@@ -18,11 +18,12 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.util.HashMap;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api")
 public class AuthController {
-
 
     @Autowired
     private AuthenticationManager authenticationManager;
@@ -39,9 +40,9 @@ public class AuthController {
     @Autowired
     PasswordEncoder passwordEncoder;
 
-    @GetMapping("/hello")
-    public String hello() {
-        return "<h1>Hello Authenticated User!!</h1>";
+    @GetMapping("/auth")
+    public ResponseEntity<?> auth() {
+        return ResponseEntity.ok("Authenticated");
     }
 
     @PostMapping("/signin")
@@ -64,27 +65,29 @@ public class AuthController {
 
     @PostMapping("/signup")
     public ResponseEntity<?> registerUser(@Valid @RequestBody SignupRequest signUpRequest) {
+        boolean badRequest = false;
+        Map<String,String> response = new HashMap<>();
         if (userRepository.existsByUsername(signUpRequest.getUsername())) {
-            return ResponseEntity
-                    .badRequest()
-                    .body(new MessageResponse("Error: Username is already taken!"));
+            badRequest = true;
+            response.put("username", "Username is already taken!");
         }
-
         if (userRepository.existsByEmail(signUpRequest.getEmail())) {
-            return ResponseEntity
-                    .badRequest()
-                    .body(new MessageResponse("Error: Email is already in use!"));
+            badRequest = true;
+            response.put("email", "Email is already in use!");
+        }
+        if (badRequest) {
+            System.out.println(response);
+            return ResponseEntity.badRequest().body(response);
         }
 
         // Create new user's account
         User user = new User(signUpRequest.getUsername(),
                 signUpRequest.getEmail(),
+                signUpRequest.getName(),
                 passwordEncoder.encode(signUpRequest.getPassword()));
-
         userRepository.save(user);
 
-        return ResponseEntity.ok(new MessageResponse("User registered successfully!"));
+        return ResponseEntity.ok(new MessageResponse());
     }
-
 
 }
