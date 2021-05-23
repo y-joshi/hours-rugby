@@ -12,7 +12,7 @@ const SessionTimeout = lazy(() => import('./pages/SessonTimeout'))
 
 function App() {
   return (
-    <Provider store ={ store}>
+    <Provider store ={store}>
       <Router>
         <AccessibleNavigationAnnouncer />
         <Switch>

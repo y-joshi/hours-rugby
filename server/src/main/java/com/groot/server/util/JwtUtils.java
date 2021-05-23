@@ -1,11 +1,15 @@
 package com.groot.server.util;
 
+import com.groot.server.model.User;
+import com.groot.server.repository.UserRepository;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
+import javax.persistence.Access;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -14,11 +18,17 @@ import java.util.function.Function;
 @Service
 public class JwtUtils {
 
+    @Autowired
+    UserRepository userRepository;
+
     private final String SECRET_KEY = "very-secret";
     private final int EXP_TIME = 1000*60*60*24*5;// 5 days
 
     public String extractUsername(String token) {
         return extractClaim(token, Claims::getSubject);
+    }
+    public User getUserByToken(String token){
+        return userRepository.findGrootUser(extractUsername(token));
     }
 
     public Date extractExpiration(String token) {
