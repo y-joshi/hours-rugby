@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { connect } from 'react-redux'
 
 import axios from 'axios'
-import { setIsActive, setIsStopped } from '../redux'
+import { setIsActive, setIsStopped, setUser } from '../redux'
 import InfoCard from '../components/Cards/InfoCard'
 import ChartCard from '../components/Chart/ChartCard'
 import { Doughnut, Line } from 'react-chartjs-2'
@@ -23,6 +23,7 @@ import {
   lineLegends,
 } from '../utils/demo/chartsData'
 import StopWatch from '../utils/Watch/Stopwatch'
+import { setTask } from '../redux/startedTask/taskActions'
 
 function Dashboard(props) {
   const [addSubject, setAddSubject] = useState('')
@@ -71,8 +72,7 @@ function Dashboard(props) {
         }
       })
         .then(res => {
-          const newList = subjectList.concat(subject)
-          setSubjectList(newList)
+          props.setUser(res.data.user)
           setAddSubject('')
         })
         .catch(err => { console.log(err) })
@@ -82,10 +82,17 @@ function Dashboard(props) {
   }
 
   const handleStartTimer = () => {
+    let task = {
+      name: startedTask,
+      subject: selectedSubject,
+      description: taskDescription,
+      startedAt: Date.now(),
+      endedAt: null
+    }
+    props.setTask(task)
     setIsTaskModalOpen(false)
     props.setTimerIsActive(true)
     props.setTimerIsStopped(false)
-    localStorage.setItem('time', 0)
     setStartTimer(true)
   }
 
@@ -98,7 +105,7 @@ function Dashboard(props) {
         (
           <Card colored className="w-full mt-6  mb-6 text-white bg-blue-400 dark:bg-green-600 flex-wrap items-center">
             <CardBody>
-              <StopWatch taskname={startedTask} subject={selectedSubject} description={taskDescription} />
+              <StopWatch taskname={props.task.name} subject={props.task.subject} description={props.task.description} />
             </CardBody>
           </Card>
 
@@ -127,7 +134,7 @@ function Dashboard(props) {
               <Select className="relative mt-4 text-gray-500 focus-within:text-black dark:focus-within:text-white" onClick={handleSelectSubject} placeholder="Hello">
                 <option hidden>Select Subject</option>
 
-                {subjectList.map(subject => <option key={subject} >{subject} </option>)}
+                {props.user.subjects.map(subject => <option key={subject.id} >{subject.subjectName} </option>)}
 
                 <option className="bg-green-300 dark:bg-green-800" value="addSubject">+ Add new Subject</option>
               </Select>
@@ -239,14 +246,19 @@ const mapStateToProps = state => {
     isTimerActive: state.timer.isActive,
     isTimerStopped: state.timer.isStopped,
     isTimerPaused: state.timer.isPaused,
-    user: state.user.user
+
+    user: state.user.user,
+
+    task: state.startedTask.task
   }
 }
 
 const mapDispatchToProps = dispatch => {
   return {
     setTimerIsActive: (val) => dispatch(setIsActive(val)),
-    setTimerIsStopped: (val) => dispatch(setIsStopped(val))
+    setTimerIsStopped: (val) => dispatch(setIsStopped(val)),
+    setUser: (val) => dispatch(setUser(val)),
+    setTask: (val) => dispatch(setTask(val))
   }
 }
 

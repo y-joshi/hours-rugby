@@ -14,8 +14,8 @@ public class Subject {
 
     @NotBlank
     @Size(max = 20)
-    @Column(name = "subject")
-    private String subject;
+    @Column(name = "subject_name")
+    private String subjectName;
 
     @OneToMany(mappedBy = "subject")
     Set<UserTask> userTasks;
@@ -27,8 +27,8 @@ public class Subject {
     public Subject() {
     }
 
-    public Subject(String subject, User user) {
-        this.subject = subject;
+    public Subject(String subjectName, User user) {
+        this.subjectName = subjectName;
         this.user = user;
     }
 
@@ -48,11 +48,11 @@ public class Subject {
         this.id = id;
     }
 
-    public String getSubject() {
-        return subject;
+    public String getSubjectName() {
+        return subjectName;
     }
 
-    public void setSubject(String subject) {
-        this.subject = subject;
+    public void setSubjectName(String subjectName) {
+        this.subjectName = subjectName;
     }
 }

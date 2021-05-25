@@ -1,5 +1,6 @@
 package com.groot.server.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.springframework.boot.context.properties.bind.DefaultValue;
 
 import javax.persistence.*;
@@ -13,11 +14,13 @@ public class UserTask {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long id;
 
-    @ManyToOne
+    @JsonIgnore
+    @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "user_id")
     User user;
 
-    @ManyToOne
+    @JsonIgnore
+    @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "subject_id")
     Subject subject;
 

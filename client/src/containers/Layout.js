@@ -32,7 +32,7 @@ function Layout(props) {
         }
       })
         .then(res => {
-          console.log(res);
+          console.log(res.data);
           props.setUser(res.data.user)
           setValidToken(true)
           setIsLoading(false)

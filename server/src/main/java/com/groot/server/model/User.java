@@ -4,6 +4,7 @@ import javax.persistence.*;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Size;
+import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -35,11 +36,11 @@ public class User {
     @Size(max = 120)
     private String password;
 
-    @OneToMany(mappedBy = "user")
-    Set<UserTask> userTasks;
+    @OneToMany(mappedBy = "user", targetEntity = UserTask.class)
+    List<UserTask> userTasks;
 
-    @OneToMany(mappedBy = "user")
-    Set<Subject> subjects;
+    @OneToMany(mappedBy = "user", targetEntity = Subject.class)
+    List<Subject> subjects;
 
     public User() {
     }
@@ -51,11 +52,11 @@ public class User {
         this.password = password;
     }
 
-    public Set<UserTask> getUserTasks() {
+    public List<UserTask> getUserTasks() {
         return userTasks;
     }
 
-    public void setUserTasks(Set<UserTask> userTasks) {
+    public void setUserTasks(List<UserTask> userTasks) {
         this.userTasks = userTasks;
     }
 
@@ -99,11 +100,11 @@ public class User {
         this.password = password;
     }
 
-    public Set<Subject> getSubjects() {
+    public List<Subject> getSubjects() {
         return subjects;
     }
 
-    public void setSubjects(Set<Subject> subjects) {
+    public void setSubjects(List<Subject> subjects) {
         this.subjects = subjects;
     }
 }

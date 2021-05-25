@@ -1,14 +1,37 @@
 import React, { useState, Fragment } from "react"
 import { connect } from 'react-redux'
 
-import { setIsActive, setTime, setIsPaused, setIsStopped, resetTime } from '../../redux'
+import { setIsActive, setTime, setIsPaused, setIsStopped, resetTime, setUser } from '../../redux'
 import Timer from "./Timer"
 import { Pause, PlayArrow, Stop, Timer as TimerIcon } from '@material-ui/icons'
 import { IconButton } from '@material-ui/core'
+import { setTask } from "../../redux/startedTask/taskActions"
+import axios from "axios"
 
 
 function StopWatch(props) {
   const handleStop = () => {
+
+    const request = JSON.stringify({
+      name: props.task.name,
+      subject: props.task.subject,
+      description: props.task.description,
+      startedAt: props.task.startedAt,
+      endedAt: Date.now(),
+      time: props.time
+    })
+
+    axios.post(process.env.REACT_APP_API_URL + "addTask", request, {
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${localStorage.getItem('jwt')}`
+      }
+    })
+      .then(res => {
+        props.setUser(res.data.user)
+      })
+      .catch(err => { console.log(err) })
+
     props.setIsActive(false)
     props.setIsPaused(false)
     props.setIsStopped(true)
@@ -53,7 +76,7 @@ function StopWatch(props) {
         )
       }
     </Fragment>
-  );
+  )
 }
 
 const mapStateToProps = state => {
@@ -61,7 +84,8 @@ const mapStateToProps = state => {
     isActive: state.timer.isActive,
     isPaused: state.timer.isPaused,
     isStopped: state.timer.isStopped,
-    time: state.timer.time
+    time: state.timer.time,
+    task: state.startedTask.task
   }
 }
 
@@ -71,7 +95,9 @@ const mapDispatchToProps = dispatch => {
     setIsPaused: (val) => dispatch(setIsPaused(val)),
     setIsStopped: (val) => dispatch(setIsStopped(val)),
     setTime: (val) => dispatch(setTime(val)),
-    resetTime: () => dispatch(resetTime())
+    resetTime: () => dispatch(resetTime()),
+    setTask: (val) => dispatch(setTask(val)),
+    setUser: (val) => dispatch(setUser(val))
   }
 }
 
