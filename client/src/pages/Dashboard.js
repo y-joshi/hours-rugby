@@ -1,29 +1,19 @@
 import React, { useState, useEffect } from 'react'
+import { connect } from 'react-redux'
 
-import CTA from '../components/CTA'
+import axios from 'axios'
+import { setIsActive, setIsStopped, setUser } from '../redux'
 import InfoCard from '../components/Cards/InfoCard'
 import ChartCard from '../components/Chart/ChartCard'
 import { Doughnut, Line } from 'react-chartjs-2'
 import ChartLegend from '../components/Chart/ChartLegend'
 import PageTitle from '../components/Typography/PageTitle'
-import { ChatIcon, CartIcon, MoneyIcon, PeopleIcon } from '../icons'
+import { ChatIcon, CartIcon, MoneyIcon, PeopleIcon, FormsIcon, HeartIcon } from '../icons'
 import RoundIcon from '../components/RoundIcon'
-import response from '../utils/demo/tableData'
-import { HeartIcon, EditIcon, } from '../icons'
-import { PlayArrowRounded } from '@material-ui/icons'
+import { PlayArrowRounded, Assignment, Subject, Pause, LibraryBooks, Add, Timer } from '@material-ui/icons'
 
 import {
-  TableBody,
-  TableContainer,
-  Table,
-  TableHeader,
-  TableCell,
-  TableRow,
-  TableFooter,
-  Avatar,
-  Badge,
-  Pagination,
-  Button
+  Input, Textarea, Label, HelperText, Select, Modal, ModalBody, ModalFooter, ModalHeader, Button, Card, CardBody
 } from '@windmill/react-ui'
 
 import {
@@ -32,31 +22,170 @@ import {
   doughnutLegends,
   lineLegends,
 } from '../utils/demo/chartsData'
+import StopWatch from '../utils/Watch/Stopwatch'
+import { setTask } from '../redux/startedTask/taskActions'
 
-function Dashboard() {
-  const [page, setPage] = useState(1)
-  const [data, setData] = useState([])
+function Dashboard(props) {
+  const [addSubject, setAddSubject] = useState('')
+  const [isTaskModalOpen, setIsTaskModalOpen] = useState(false)
+  const [isSubjectModalOpen, setIsSubjectModalOpen] = useState(false)
+  const [startedTask, setStartedTask] = useState('')
+  const [selectedSubject, setSelectedSubject] = useState('')
+  const [subjectList, setSubjectList] = useState([])
+  const [taskDescription, setTaskDescription] = useState('')
+  const [startTimer, setStartTimer] = useState(false)
+  const [clearTask, setClearTask] = useState(false)
 
-  // pagination setup
-  const resultsPerPage = 10
-  const totalResults = response.length
+  useEffect(() => {
+    if (props.isTimerStopped === false) {
+      if (clearTask) {
+        setStartedTask('')
+        setSelectedSubject('')
+        setTaskDescription('')
+      }
+      setClearTask(true)
+    }
+  })
 
-  // pagination change control
-  function onPageChange(p) {
-    setPage(p)
+  const handleSelectSubject = (event) => {
+    if (event.target.value === "addSubject") {
+      event.target.value = null
+      setIsSubjectModalOpen(true)
+    }
+    else {
+      setSelectedSubject(event.target.value)
+    }
   }
 
-  // on page change, load new sliced data
-  // here you would make another server request for new data
-  useEffect(() => {
-    setData(response.slice((page - 1) * resultsPerPage, page * resultsPerPage))
-  }, [page])
+  const handleAddSubject = (event) => {
+    if (addSubject.trim() !== '') {
+      let subject = addSubject.trim()
+
+      const request = JSON.stringify({
+        "subject": subject
+      })
+
+      axios.post(process.env.REACT_APP_API_URL + "addSubject", request, {
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('jwt')}`
+        }
+      })
+        .then(res => {
+          props.setUser(res.data.user)
+          setAddSubject('')
+        })
+        .catch(err => { console.log(err) })
+
+      setIsSubjectModalOpen(false)
+    }
+  }
+
+  const handleStartTimer = () => {
+    let task = {
+      name: startedTask,
+      subject: selectedSubject,
+      description: taskDescription,
+      startedAt: Date.now(),
+      endedAt: null
+    }
+    props.setTask(task)
+    setIsTaskModalOpen(false)
+    props.setTimerIsActive(true)
+    props.setTimerIsStopped(false)
+    setStartTimer(true)
+  }
 
   return (
     <React.Fragment>
-      <div className="mt-6 ml-2 mb-6 btn-success">
-        <Button iconRight={PlayArrowRounded} size="large"> Start </Button>
-      </div>
+      {props.isTimerStopped ?
+        (<div className="mt-6 ml-2 mb-6 btn-success">
+          <Button iconRight={Add} size="large" onClick={() => setIsTaskModalOpen(true)}> Start A Task </Button>
+        </div>) :
+        (
+          <Card colored className="w-full mt-6  mb-6 text-white bg-blue-400 dark:bg-green-600 flex-wrap items-center">
+            <CardBody>
+              <StopWatch taskname={props.task.name} subject={props.task.subject} description={props.task.description} />
+            </CardBody>
+          </Card>
+
+        )
+      }
+
+      <Modal isOpen={isTaskModalOpen} onClose={() => { setIsTaskModalOpen(false) }}>
+        <ModalHeader> Start a Task</ModalHeader>
+        <ModalBody>
+          <div className="mb-8 bg-white  dark:bg-gray-800">
+            <Label>
+              <div className="relative mt-4 text-gray-500 focus-within:text-purple-600 dark:focus-within:text-purple-400">
+                <input
+                  className="block w-full pl-10 mt-1 text-sm text-black dark:text-gray-300 dark:border-gray-600 dark:bg-gray-700 focus:border-purple-400 focus:outline-none focus:shadow-outline-purple dark:focus:shadow-outline-gray form-input"
+                  placeholder="Enter task name e.g. Chapter 5 Biodiversity"
+                  value={startedTask}
+                  onChange={(e) => setStartedTask(e.target.value)}
+                />
+                <div className="absolute inset-y-0 flex items-center ml-3 pointer-events-none">
+                  <FormsIcon className="w-5 h-5" aria-hidden="true" />
+                </div>
+              </div>
+            </Label>
+
+            <Label className="mt-4">
+              <Select className="relative mt-4 text-gray-500 focus-within:text-black dark:focus-within:text-white" onClick={handleSelectSubject} placeholder="Hello">
+                <option hidden>Select Subject</option>
+
+                {props.user.subjects.map(subject => <option key={subject.id} >{subject.subjectName} </option>)}
+
+                <option className="bg-green-300 dark:bg-green-800" value="addSubject">+ Add new Subject</option>
+              </Select>
+            </Label>
+
+            <Label className="mt-4">
+              <Textarea className="mt-1" rows="3" placeholder="Description" value={taskDescription} onChange={(e) => setTaskDescription(e.target.value)} />
+            </Label>
+
+          </div>
+        </ModalBody>
+        <ModalFooter>
+          <div className="hidden sm:block">
+            <Button iconRight={PlayArrowRounded} onClick={handleStartTimer}>
+              Start
+            </Button>
+          </div>
+          <div className="block w-full sm:hidden">
+            <Button block size="large" iconRight={PlayArrowRounded} onClick={handleStartTimer}>
+              Start
+            </Button>
+          </div>
+        </ModalFooter>
+      </Modal>
+      <Modal isOpen={isSubjectModalOpen} onClose={() => setIsSubjectModalOpen(false)}>
+        <ModalHeader>Add new Subject</ModalHeader>
+        <ModalBody>
+          <Label>
+            <div className="relative mt-4 text-gray-500 focus-within:text-purple-600 dark:focus-within:text-purple-400">
+              <input
+                className="block w-full pl-10 mt-1 text-sm text-black dark:text-gray-300 dark:border-gray-600 dark:bg-gray-700 focus:border-purple-400 focus:outline-none focus:shadow-outline-purple dark:focus:shadow-outline-gray form-input"
+                placeholder="Enter Subject Name"
+                value={addSubject}
+                onChange={e => setAddSubject(e.target.value)}
+              />
+              <div className="absolute inset-y-0 flex items-center ml-3 pointer-events-none">
+                <LibraryBooks className="w-5 h-5" aria-hidden="true" />
+              </div>
+            </div>
+          </Label>
+        </ModalBody>
+        <ModalFooter>
+          <div className="hidden sm:block">
+            <Button onClick={handleAddSubject}>Add</Button>
+          </div>
+          <div className="block w-full sm:hidden">
+            <Button block size="large" onClick={handleAddSubject}>Add</Button>
+          </div>
+        </ModalFooter>
+      </Modal>
+
 
       {/* <!-- Cards --> */}
       <div className="grid gap-6 mb-8 md:grid-cols-2 xl:grid-cols-4">
@@ -76,7 +205,7 @@ function Dashboard() {
             bgColorClass="bg-green-100 dark:bg-green-500"
             className="mr-4"
           />
-        </InfoCard> 
+        </InfoCard>
 
         <InfoCard title="New sales" value="376">
           <RoundIcon
@@ -112,5 +241,28 @@ function Dashboard() {
     </React.Fragment>
   )
 }
+const mapStateToProps = state => {
+  return {
+    isTimerActive: state.timer.isActive,
+    isTimerStopped: state.timer.isStopped,
+    isTimerPaused: state.timer.isPaused,
 
-export default Dashboard
+    user: state.user.user,
+
+    task: state.startedTask.task
+  }
+}
+
+const mapDispatchToProps = dispatch => {
+  return {
+    setTimerIsActive: (val) => dispatch(setIsActive(val)),
+    setTimerIsStopped: (val) => dispatch(setIsStopped(val)),
+    setUser: (val) => dispatch(setUser(val)),
+    setTask: (val) => dispatch(setTask(val))
+  }
+}
+
+export default connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(Dashboard)

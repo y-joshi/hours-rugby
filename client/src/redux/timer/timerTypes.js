@@ -1,0 +1,5 @@
+export const SET_IS_ACTIVE = "SET_IS_ACTIVE"
+export const SET_IS_PAUSED = "SET_IS_PAUSED"
+export const SET_IS_STOPPED = "SET_IS_STOPPED"
+export const SET_TIME = "SET_TIME"
+export const RESET_TIME = "RESET_TIME"

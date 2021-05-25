@@ -1,6 +1,8 @@
 import React, { useContext, Suspense, useEffect, lazy, useState } from 'react'
 import { Switch, Route, Redirect, useLocation } from 'react-router-dom'
 import routes from '../routes'
+import { connect } from 'react-redux'
+import { setIsActive, setTime, setIsPaused, setIsStopped, setUser } from '../redux'
 
 import Sidebar from '../components/Sidebar'
 import Header from '../components/Header'
@@ -11,7 +13,7 @@ import axios from 'axios'
 
 const Page404 = lazy(() => import('../pages/404'))
 
-function Layout() {
+function Layout(props) {
   const { isSidebarOpen, closeSidebar } = useContext(SidebarContext)
   const [validToken, setValidToken] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
@@ -30,7 +32,8 @@ function Layout() {
         }
       })
         .then(res => {
-          console.log(res);
+          console.log(res.data);
+          props.setUser(res.data.user)
           setValidToken(true)
           setIsLoading(false)
         })
@@ -40,8 +43,22 @@ function Layout() {
           setIsLoading(false)
         })
     }
+
+    let interval = null;
+
+    if (props.isStopped === false && props.isPaused === false) {
+      interval = setInterval(() => {
+        props.setTime(1000)
+      }, 1000)
+    } else {
+      clearInterval(interval)
+    }
+    return () => {
+      clearInterval(interval)
+    }
+
     closeSidebar()
-  }, [location])
+  }, [location, props.isActive, props.isPaused])
 
   return (
     <React.Fragment>
@@ -83,4 +100,28 @@ function Layout() {
   )
 }
 
-export default Layout
+const mapStateToProps = state => {
+  return {
+    isActive: state.timer.isActive,
+    isPaused: state.timer.isPaused,
+    isStopped: state.timer.isStopped,
+    time: state.timer.time,
+    user: state.user.user
+  }
+}
+
+const mapDispatchToProps = dispatch => {
+  return {
+    setIsActive: (val) => dispatch(setIsActive(val)),
+    setIsPaused: (val) => dispatch(setIsPaused(val)),
+    setIsStopped: (val) => dispatch(setIsStopped(val)),
+    setTime: (val) => dispatch(setTime(val)),
+    setUser: (val) => dispatch(setUser(val))
+  }
+}
+
+export default connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(Layout)
+

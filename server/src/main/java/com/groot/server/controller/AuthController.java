@@ -41,8 +41,11 @@ public class AuthController {
     PasswordEncoder passwordEncoder;
 
     @GetMapping("/auth")
-    public ResponseEntity<?> auth() {
-        return ResponseEntity.ok("Authenticated");
+    public ResponseEntity<?> auth(@RequestHeader("Authorization") String requestHeader) {
+        String jwt = requestHeader.substring(7);
+        Map<String, Object> response = new HashMap<>();
+        response.put("user", jwtUtils.getUserByToken(jwt));
+        return ResponseEntity.ok(response);
     }
 
     @PostMapping("/signin")
@@ -60,13 +63,16 @@ public class AuthController {
         }
         final UserDetails userDetails = userDetailsService
                 .loadUserByUsername(authenticationRequest.getUsername());
-        return ResponseEntity.ok(new JwtResponse(jwtUtils.generateToken(userDetails)));
+        Map<String, Object> response = new HashMap<>();
+        response.put("jwt", new JwtResponse(jwtUtils.generateToken(userDetails)));
+        response.put("user", userRepository.findGrootUser(authenticationRequest.getUsername()));
+        return ResponseEntity.ok(response);
     }
 
     @PostMapping("/signup")
     public ResponseEntity<?> registerUser(@Valid @RequestBody SignupRequest signUpRequest) {
         boolean badRequest = false;
-        Map<String,String> response = new HashMap<>();
+        Map<String, String> response = new HashMap<>();
         if (userRepository.existsByUsername(signUpRequest.getUsername())) {
             badRequest = true;
             response.put("username", "Username is already taken!");
