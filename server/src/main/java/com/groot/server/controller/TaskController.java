@@ -62,7 +62,7 @@ public class TaskController {
         Subject subject = new Subject(requestBody.get("subject"),user);
         UserTask userTask = new UserTask(
                 user,
-                subject,
+                subjectRepository.getOne(Long.parseLong(requestBody.get("subjectId"))),
                 false,
                 LocalDateTime.ofInstant(Instant.ofEpochMilli(Long.parseLong(requestBody.get("startedAt"))),
                         TimeZone.getDefault().toZoneId()),
@@ -72,6 +72,7 @@ public class TaskController {
                 requestBody.get("name"),
                 requestBody.get("description")
         );
+
         userTaskRepository.save(userTask);
 
         Map<String, Object> response = new HashMap<>();
