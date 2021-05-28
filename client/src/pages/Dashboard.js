@@ -10,8 +10,8 @@ import ChartLegend from '../components/Chart/ChartLegend'
 import PageTitle from '../components/Typography/PageTitle'
 import { ChatIcon, CartIcon, MoneyIcon, PeopleIcon, FormsIcon, HeartIcon } from '../icons'
 import RoundIcon from '../components/RoundIcon'
-import { PlayArrowRounded, Assignment, Subject, Pause, LibraryBooks, Add, Timer } from '@material-ui/icons'
-
+import { PlayArrowRounded, AlarmOn, LocalPlay, CheckCircle, LibraryBooks, Add, Timer } from '@material-ui/icons'
+import { getweekTime, getweekTasks, getmaxTimeWeek, getsubjects } from '../utils/Calculation/CardDataProvider'
 import {
   Input, Textarea, Label, HelperText, Select, Modal, ModalBody, ModalFooter, ModalHeader, Button, Card, CardBody
 } from '@windmill/react-ui'
@@ -31,10 +31,10 @@ function Dashboard(props) {
   const [isSubjectModalOpen, setIsSubjectModalOpen] = useState(false)
   const [startedTask, setStartedTask] = useState('')
   const [selectedSubject, setSelectedSubject] = useState('')
-  const [subjectList, setSubjectList] = useState([])
+  const [subjectID, setSubjectID] = useState('')
   const [taskDescription, setTaskDescription] = useState('')
-  const [startTimer, setStartTimer] = useState(false)
   const [clearTask, setClearTask] = useState(false)
+  const [cardData, setCardData] = useState({})
 
   useEffect(() => {
     if (props.isTimerStopped === false) {
@@ -42,10 +42,11 @@ function Dashboard(props) {
         setStartedTask('')
         setSelectedSubject('')
         setTaskDescription('')
+        setSubjectID('')
       }
       setClearTask(true)
     }
-  })
+  }, [cardData])
 
   const handleSelectSubject = (event) => {
     if (event.target.value === "addSubject") {
@@ -54,6 +55,8 @@ function Dashboard(props) {
     }
     else {
       setSelectedSubject(event.target.value)
+      const selectedIndex = event.target.options.selectedIndex;
+      setSubjectID(event.target.options[selectedIndex].getAttribute('data-key'))
     }
   }
 
@@ -85,6 +88,7 @@ function Dashboard(props) {
     let task = {
       name: startedTask,
       subject: selectedSubject,
+      subjectId: subjectID,
       description: taskDescription,
       startedAt: Date.now(),
       endedAt: null
@@ -93,7 +97,6 @@ function Dashboard(props) {
     setIsTaskModalOpen(false)
     props.setTimerIsActive(true)
     props.setTimerIsStopped(false)
-    setStartTimer(true)
   }
 
   return (
@@ -134,7 +137,7 @@ function Dashboard(props) {
               <Select className="relative mt-4 text-gray-500 focus-within:text-black dark:focus-within:text-white" onClick={handleSelectSubject} placeholder="Hello">
                 <option hidden>Select Subject</option>
 
-                {props.user.subjects.map(subject => <option key={subject.id} >{subject.subjectName} </option>)}
+                {props.user.subjects.map(subject => <option key={subject.id} data-key={subject.id}>{subject.subjectName} </option>)}
 
                 <option className="bg-green-300 dark:bg-green-800" value="addSubject">+ Add new Subject</option>
               </Select>
@@ -189,51 +192,47 @@ function Dashboard(props) {
 
       {/* <!-- Cards --> */}
       <div className="grid gap-6 mb-8 md:grid-cols-2 xl:grid-cols-4">
-        <InfoCard title="Total clients" value="6389">
+        <InfoCard title="Subjects" value={getsubjects(props.user)}>
           <RoundIcon
-            icon={PeopleIcon}
+            icon={LibraryBooks}
             iconColorClass="text-orange-500 dark:text-orange-100"
             bgColorClass="bg-orange-100 dark:bg-orange-500"
-            className="mr-4"
           />
         </InfoCard>
 
-        <InfoCard title="Account balance" value="$ 46,760.89">
+        <InfoCard title="This Week Time" value={getweekTime(props.user)}>
           <RoundIcon
-            icon={MoneyIcon}
+            icon={Timer}
             iconColorClass="text-green-500 dark:text-green-100"
             bgColorClass="bg-green-100 dark:bg-green-500"
-            className="mr-4"
           />
         </InfoCard>
 
-        <InfoCard title="New sales" value="376">
+        <InfoCard title="Tasks in Week" value={getweekTasks(props.user)}>
           <RoundIcon
-            icon={CartIcon}
-            iconColorClass="text-blue-500 dark:text-blue-100"
+            icon={CheckCircle}
+            iconColorClass="text-teal-500 dark:text-blue-100"
             bgColorClass="bg-blue-100 dark:bg-blue-500"
-            className="mr-4"
           />
         </InfoCard>
 
-        <InfoCard title="Pending contacts" value="35">
+        <InfoCard title="Max Time in Week" value={getmaxTimeWeek(props.user)}>
           <RoundIcon
-            icon={ChatIcon}
-            iconColorClass="text-teal-500 dark:text-teal-100"
+            icon={LocalPlay}
+            iconColorClass="text-yellow-500 dark:text-teal-100"
             bgColorClass="bg-teal-100 dark:bg-teal-500"
-            className="mr-4"
           />
         </InfoCard>
       </div>
 
-      <PageTitle>Charts</PageTitle>
+      <PageTitle>Performance</PageTitle>
       <div className="grid gap-6 mb-8 md:grid-cols-2">
-        <ChartCard title="Revenue">
+        <ChartCard title="Time Allocation">
           <Doughnut {...doughnutOptions} />
           <ChartLegend legends={doughnutLegends} />
         </ChartCard>
 
-        <ChartCard title="Traffic">
+        <ChartCard title="This Week">
           <Line {...lineOptions} />
           <ChartLegend legends={lineLegends} />
         </ChartCard>

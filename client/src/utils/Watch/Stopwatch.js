@@ -15,6 +15,7 @@ function StopWatch(props) {
     const request = JSON.stringify({
       name: props.task.name,
       subject: props.task.subject,
+      subjectId:props.task.subjectId,
       description: props.task.description,
       startedAt: props.task.startedAt,
       endedAt: Date.now(),
