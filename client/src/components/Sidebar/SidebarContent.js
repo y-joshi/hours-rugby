@@ -4,8 +4,10 @@ import { NavLink, Route } from 'react-router-dom'
 import * as Icons from '../../icons'
 import SidebarSubmenu from './SidebarSubmenu'
 import { Button } from '@windmill/react-ui'
-
+import { LocalLibraryRounded } from '@material-ui/icons'
 function Icon({ icon, ...props }) {
+  if (icon === 'LocalLibraryRounded')
+    return <LocalLibraryRounded />
   const Icon = Icons[icon]
   return <Icon {...props} />
 }
