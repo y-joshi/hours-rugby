@@ -62,7 +62,7 @@ public class TaskController {
         Subject subject = new Subject(requestBody.get("subject"),user);
         UserTask userTask = new UserTask(
                 user,
-                subjectRepository.getOne(Long.parseLong(requestBody.get("subjectId"))),
+                subjectRepository.findById(Long.parseLong(requestBody.get("subjectId"))).get(),
                 false,
                 LocalDateTime.ofInstant(Instant.ofEpochMilli(Long.parseLong(requestBody.get("startedAt"))),
                         TimeZone.getDefault().toZoneId()),

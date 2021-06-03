@@ -22,7 +22,7 @@ import response from '../utils/Data/tableData'
 // make a copy of the data, for the second table
 const response2 = response.concat([])
 
-function Tables() {
+function Subjects() {
   /**
    * DISCLAIMER: This code could be badly improved, but for the sake of the example
    * and readability, all the logic for both table are here.
@@ -67,7 +67,7 @@ function Tables() {
 
   return (
     <>
-      <PageTitle>Tables</PageTitle>
+      <PageTitle>Subjects</PageTitle>
 
       <CTA />
 
@@ -177,4 +177,4 @@ function Tables() {
   )
 }
 
-export default Tables
+export default Subjects

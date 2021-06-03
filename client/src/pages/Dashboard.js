@@ -8,20 +8,16 @@ import ChartCard from '../components/Chart/ChartCard'
 import { Doughnut, Line } from 'react-chartjs-2'
 import ChartLegend from '../components/Chart/ChartLegend'
 import PageTitle from '../components/Typography/PageTitle'
-import { ChatIcon, CartIcon, MoneyIcon, PeopleIcon, FormsIcon, HeartIcon } from '../icons'
+import { ChatIcon, MoneyIcon, FormsIcon, HeartIcon } from '../icons'
 import RoundIcon from '../components/RoundIcon'
-import { PlayArrowRounded, AlarmOn, LocalPlay, CheckCircle, LibraryBooks, Add, Timer } from '@material-ui/icons'
+import { PlayArrowRounded, LocalLibraryRounded, LocalPlay, CheckCircle, LibraryBooks, Add, TimerRounded, CheckCircleRounded, LocalPlayRounded } from '@material-ui/icons'
 import { getweekTime, getweekTasks, getmaxTimeWeek, getsubjects } from '../utils/Calculation/CardDataProvider'
 import {
   Input, Textarea, Label, HelperText, Select, Modal, ModalBody, ModalFooter, ModalHeader, Button, Card, CardBody
 } from '@windmill/react-ui'
-
 import {
-  doughnutOptions,
-  lineOptions,
-  doughnutLegends,
-  lineLegends,
-} from '../utils/demo/chartsData'
+  doughnutLegends, doughnutOptions, lineLegends, lineOptions
+} from '../utils/Data/chartsData'
 import StopWatch from '../utils/Watch/Stopwatch'
 import { setTask } from '../redux/startedTask/taskActions'
 
@@ -194,7 +190,7 @@ function Dashboard(props) {
       <div className="grid gap-6 mb-8 md:grid-cols-2 xl:grid-cols-4">
         <InfoCard title="Subjects" value={getsubjects(props.user)}>
           <RoundIcon
-            icon={LibraryBooks}
+            icon={LocalLibraryRounded}
             iconColorClass="text-orange-500 dark:text-orange-100"
             bgColorClass="bg-orange-100 dark:bg-orange-500"
           />
@@ -202,7 +198,7 @@ function Dashboard(props) {
 
         <InfoCard title="This Week Time" value={getweekTime(props.user)}>
           <RoundIcon
-            icon={Timer}
+            icon={TimerRounded}
             iconColorClass="text-green-500 dark:text-green-100"
             bgColorClass="bg-green-100 dark:bg-green-500"
           />
@@ -210,7 +206,7 @@ function Dashboard(props) {
 
         <InfoCard title="Tasks in Week" value={getweekTasks(props.user)}>
           <RoundIcon
-            icon={CheckCircle}
+            icon={CheckCircleRounded}
             iconColorClass="text-teal-500 dark:text-blue-100"
             bgColorClass="bg-blue-100 dark:bg-blue-500"
           />
@@ -218,7 +214,7 @@ function Dashboard(props) {
 
         <InfoCard title="Max Time in Week" value={getmaxTimeWeek(props.user)}>
           <RoundIcon
-            icon={LocalPlay}
+            icon={LocalPlayRounded}
             iconColorClass="text-yellow-500 dark:text-teal-100"
             bgColorClass="bg-teal-100 dark:bg-teal-500"
           />
@@ -227,14 +223,14 @@ function Dashboard(props) {
 
       <PageTitle>Performance</PageTitle>
       <div className="grid gap-6 mb-8 md:grid-cols-2">
-        <ChartCard title="Time Allocation">
-          <Doughnut {...doughnutOptions} />
-          <ChartLegend legends={doughnutLegends} />
+        <ChartCard title="Time Allocation (%)">
+          <Doughnut {...doughnutOptions(props.user)} />
+          <ChartLegend legends={doughnutLegends(props.user)} />
         </ChartCard>
 
-        <ChartCard title="This Week">
-          <Line {...lineOptions} />
-          <ChartLegend legends={lineLegends} />
+        <ChartCard title="This Week(Hrs)">
+          <Line {...lineOptions(props.user)} />
+          <ChartLegend legends={lineLegends(props.user)} />
         </ChartCard>
       </div>
     </React.Fragment>

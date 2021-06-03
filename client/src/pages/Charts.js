@@ -11,7 +11,7 @@ import {
   doughnutLegends,
   lineLegends,
   barLegends,
-} from '../utils/demo/chartsData'
+} from '../utils/Data/chartsData'
 
 function Charts() {
   return (
